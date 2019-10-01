@@ -11,8 +11,10 @@ from light_classification.tl_classifier import TLClassifier
 import tf
 import cv2
 import yaml
+import csv
 
 STATE_COUNT_THRESHOLD = 3
+COLLECT_DATA = True
 
 class TLDetector(object):
     def __init__(self):
@@ -76,6 +78,15 @@ class TLDetector(object):
         """
         self.has_image = True
         self.camera_image = msg
+
+        # Set COLLECT_DATA to True to collect training data
+        if COLLECT_DATA:
+            try:
+                cv_image = self.bridge.imgmsg_to_cv2(msg, "bgr8")
+                cv2.imwrite("light_classification/training_data/data-{}.jpg".format(rospy.Time.now()), cv_image)
+            except CvBridgeError as e:
+                print(e)
+
         light_wp, state = self.process_traffic_lights()
 
         '''
