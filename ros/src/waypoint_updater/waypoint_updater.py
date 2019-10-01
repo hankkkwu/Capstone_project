@@ -64,7 +64,7 @@ class WaypointUpdater(object):
         # [1] : this will return the closest waypoint's index, if it's 0, it will return closest waypoint's position
         closest_idx = self.waypoint_tree.query([x,y], 1)[1]
 
-        # Check if closest is ahead or behind vehicle
+        # Check if the closest waypoint is ahead or behind vehicle
         closest_coord = self.waypoints_2d[closest_idx]
         prev_coord = self.waypoints_2d[closest_idx - 1]
 
@@ -90,7 +90,10 @@ class WaypointUpdater(object):
 
     def waypoints_cb(self, waypoints):
         # TODO: Implement
+        # Since this is the latched subscriber, once callback is called, it doesn't send the base waypoints anymore.
         self.base_waypoints = waypoints
+        # self.waypoints_2d is used to get the (x,y) coordinates of the base waypoints.
+        # And we need to make sure that self.waypoints_sd is initialized befor the subscriber is.
         if not self.waypoints_2d:
             self.waypoints_2d = [[waypoint.pose.pose.position.x, waypoint.pose.pose.position.y] for waypoint in waypoints.waypoints]
             # KDTree allow you to look up the closest point in space efficiently
