@@ -12,9 +12,10 @@ import tf
 import cv2
 import yaml
 import csv
+import time
 
 STATE_COUNT_THRESHOLD = 3
-COLLECT_DATA = True
+COLLECT_DATA = False
 
 class TLDetector(object):
     def __init__(self):
@@ -133,9 +134,9 @@ class TLDetector(object):
         """
 
         # For testing, just return the light state
-        return light.state
+        # return light.state
 
-        '''
+        
         if(not self.has_image):
             self.prev_light_loc = None
             return False
@@ -143,8 +144,12 @@ class TLDetector(object):
         cv_image = self.bridge.imgmsg_to_cv2(self.camera_image, "bgr8")
 
         #Get classification
-        return self.light_classifier.get_classification(cv_image)
-        '''
+        start = time.time()
+        traffic_state = self.light_classifier.get_classification(cv_image)
+        end = time.time()
+        # rospy.loginfo('[info] detection time:{}'.format(end-start))
+        return traffic_state
+        
 
     def process_traffic_lights(self):
         """Finds closest visible traffic light, if one exists, and determines its
@@ -160,12 +165,12 @@ class TLDetector(object):
         line_wp_idx = None
 
         # List of positions that correspond to the line to stop in front of for a given intersection
+        diff = len(self.waypoints.waypoints)
         stop_line_positions = self.config['stop_line_positions']
         if self.pose:
             car_wp_idx = self.get_closest_waypoint(self.pose.pose.position.x, self.pose.pose.position.y)
 
             #TODO find the closest visible traffic light (if one exists)
-            diff = len(self.waypoints.waypoints)
             for i, light in enumerate(self.lights):
                 # Get stop line waypoint index
                 line = stop_line_positions[i]
@@ -177,7 +182,7 @@ class TLDetector(object):
                     closest_light = light
                     line_wp_idx = temp_wp_idx
 
-        if closest_light:
+        if closest_light and diff < 80:
             state = self.get_light_state(closest_light)
             return line_wp_idx, state
         return -1, TrafficLight.UNKNOWN
