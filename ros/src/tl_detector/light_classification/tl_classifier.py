@@ -14,7 +14,8 @@ class TLClassifier(object):
         #MODEL_NAME = 'faster_rcnn_resnet101_coco_2018_01_28'
         MODEL_NAME = 'ssd_mobilenet_2018_01_28'
         PATH_TO_FROZEN_GRAPH = MODEL_NAME + '/frozen_inference_graph.pb'
-
+        
+        # Load a frozen model into memery
         self.detection_graph = tf.Graph()
         with self.detection_graph.as_default():
             od_graph_def = tf.GraphDef()
@@ -43,11 +44,16 @@ class TLClassifier(object):
             int: ID of traffic light color (specified in styx_msgs/TrafficLight)
 
         """
+
         #TODO implement light color prediction
         self.current_traffic_light = TrafficLight.UNKNOWN
 
+        #print('output dtype : {}'.format(image.dtype))
+        #print('output shape : {}'.format(image.shape))
+
         with self.detection_graph.as_default():
             img_expanded = np.expand_dims(image, axis=0)
+            #print(img_expanded.shape)
             (boxes, scores, classes, num) = self.sess.run([self.detection_boxes, self.detection_scores, 
                                                            self.detection_classes, self.num_detections],
                                                            feed_dict={self.image_tensor: img_expanded})
@@ -56,29 +62,23 @@ class TLClassifier(object):
             scores = np.squeeze(scores)
             classes = np.squeeze(classes)
 
-            area = 0
-            index = 0
-            score_threshold = 0.5
-            for i in range(len(boxes)):
-                if scores[i] > score_threshold:
-                    # for getting the closest traffic light 
-                    temp = self.calculate_area(boxes[i])
-                    if temp > area:
-                        area = temp
-                        index = i
+            score_threshold = 0.6
+            # The scores were sorted from the highest to the lowest.
+            if scores[0] > score_threshold:
+                highest_score = scores[0]
+                class_name = self.categories[classes[0]]
+                
+                if class_name == "Red":
+                    self.current_traffic_light = TrafficLight.RED
+                elif class_name == "Green":
+                    self.current_traffic_light = TrafficLight.GREEN
+                elif class_name == "Yellow":
+                    self.current_traffic_light = TrafficLight.YELLOW
+            else:
+                highest_score = 0
+                class_name = 'UNKNOWN'
 
-            class_name = self.categories[classes[index]]
-            if class_name == "Red":
-                self.current_traffic_light = TrafficLight.RED
-            elif class_name == "Green":
-                self.current_traffic_light = TrafficLight.GREEN
-            elif class_name == "Yellow":
-                self.current_traffic_light = TrafficLight.YELLOW
-
-            #rospy.loginfo('[Info] Traffic light state: {}'.format(class_name))
-            #rospy.loginfo('[Info] state score: {}'.format(scores[index]))
+            rospy.loginfo('[Info] Traffic light state: {}'.format(class_name))
+            # rospy.loginfo('[Info] state score: {}'.format(highest_score))
 
         return self.current_traffic_light
-
-    def calculate_area(self, box):
-        return (box[2] - box[0]) * (box[3] - box[1])
