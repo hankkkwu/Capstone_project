@@ -51,7 +51,7 @@ class WaypointUpdater(object):
     def loop(self):
         # Note: If you set a large LOOKAHEAD_WPS value, you might want to lower  
         # the frequency of publishing the final waypoints(~20Hz if LOOKAHEAD_WPS = 200)
-        rate = rospy.Rate(30)   # This gives us control over the publishing frequency
+        rate = rospy.Rate(15)   # This gives us control over the publishing frequency
         while not rospy.is_shutdown():
             if self.pose and self.base_lane:
                 self.publish_waypoints()
