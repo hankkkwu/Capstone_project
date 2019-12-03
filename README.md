@@ -1,3 +1,25 @@
+## Self-Driving Car Software Architecture
+Note: For this project, the obstacle detection node is not implemented
+![Software Architecture](imgs/software_architecture.png)
+
+
+
+## Perception Subsystem
+This subsystem processes data from sensors and cameras into structured information that can eventually be used for path planning or control. In this project, we'll implement the traffic light detection node.
+
+### Traffic Lighe Detection Node
+This node subscribed to four topics:
+1. /base_waypoints : The complete list of waypoints for the course.
+2. /current_pose : The vehicle's location.
+3. /image_color : Images from the vehicle's camera.
+4. /vehicle/traffic_lights : The coordinates of all traffic lights.
+And the node will publish the index of the waypoint for nearest upcoming red light's stop line to the /traffic_waypoint topic. Then the Waypoint Updater Node uses this information to determine if the car should slow down to safely stop at upcoming red lights.
+
+For the traffic light detection I've used the COCO-trained models from [TensorFlow Object Detection API](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/detection_model_zoo.md). The COCO-Trained models was pre-trained on [COCO dataset](http://cocodataset.org/#home) that contains 90 classes of images. The index for traffic light is 10. Since the COCO dataset include the traffic light detection, I used a lightweight pre-trained model : ssd_mobilenet_v1_coco that is based on Single Shot Multibox Detection (SSD), the running speed was fast and the detection accuracy was pretty good in the simulator, which is suitable for this project.
+
+
+
+---
 This is the project repo for the final project of the Udacity Self-Driving Car Nanodegree: Programming a Real Self-Driving Car. For more information about the project, see the project introduction [here](https://classroom.udacity.com/nanodegrees/nd013/parts/6047fe34-d93c-4f50-8336-b70ef10cb4b2/modules/e1a23b06-329a-4684-a717-ad476f0d8dff/lessons/462c933d-9f24-42d3-8bdc-a08a5fc866e4/concepts/5ab4b122-83e6-436d-850f-9f4d26627fd9).
 
 Please use **one** of the two installation options, either native **or** docker installation.
