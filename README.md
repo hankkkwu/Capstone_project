@@ -1,6 +1,6 @@
 ## Self-Driving Car Software Architecture
 Note: For this project, the obstacle detection node is not implemented
-![Software Architecture](imgs/software_architecture.png)
+![Software Architecture](/imgs/software_architecture.png)
 
 
 
@@ -13,6 +13,7 @@ This node subscribed to four topics:
 2. /current_pose : The vehicle's location.
 3. /image_color : Images from the vehicle's camera.
 4. /vehicle/traffic_lights : The coordinates of all traffic lights.
+
 And the node will publish the index of the waypoint for nearest upcoming red light's stop line to the /traffic_waypoint topic. Then the Waypoint Updater Node uses this information to determine if the car should slow down to safely stop at upcoming red lights.
 
 For the traffic light detection I've used the COCO-trained models from [TensorFlow Object Detection API](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/detection_model_zoo.md). The COCO-Trained models was pre-trained on [COCO dataset](http://cocodataset.org/#home) that contains 90 classes of images. The index for traffic light is 10. Since the COCO dataset include the traffic light detection, I used a lightweight pre-trained model : ssd_mobilenet_v1_coco that is based on Single Shot Multibox Detection (SSD), the running speed was fast and the detection accuracy was pretty good in the simulator, which is suitable for this project.
