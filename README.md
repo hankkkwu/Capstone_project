@@ -1,6 +1,6 @@
 ## Self-Driving Car Software Architecture
 Note: For this project, the obstacle detection node is not implemented
-![Software Architecture](/imgs/software_architecture.png)
+![Software Architecture](imgs/software_architecture.png)
 
 
 
