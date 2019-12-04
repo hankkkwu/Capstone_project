@@ -16,7 +16,17 @@ This node subscribed to four topics:
 
 And the node will publish the index of the waypoint for nearest upcoming red light's stop line to the /traffic_waypoint topic. Then the Waypoint Updater Node uses this information to determine if the car should slow down to safely stop at upcoming red lights.
 
-For the traffic light detection I've used the COCO-trained models from [TensorFlow Object Detection API](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/detection_model_zoo.md). The COCO-Trained models was pre-trained on [COCO dataset](http://cocodataset.org/#home) that contains 90 classes of images. The index for traffic light is 10. Since the COCO dataset include the traffic light detection, I used a lightweight pre-trained model : ssd_mobilenet_v1_coco that is based on Single Shot Multibox Detection (SSD), the running speed was fast and the detection accuracy was pretty good in the simulator, which is suitable for this project.
+For the traffic light detection I've used the COCO-trained models from [TensorFlow Object Detection API](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/detection_model_zoo.md). The COCO-Trained models was pre-trained on [COCO dataset](http://cocodataset.org/#home) that contains 90 classes of images and the index for traffic light is 10. Since the COCO dataset include the traffic light detection, I used a lightweight pre-trained model : ssd_mobilenet_v1_coco that is based on Single Shot Multibox Detection (SSD), the running speed was fast and the detection accuracy was pretty good in the simulator, which is suitable for this project.
+
+To train a model based on ssd_mobilenet_v1_coco, I collected total of 1056 images from the simulator, and used 856 images as training dataset, 200 images as test dataset, then utilized [LabelImg](https://github.com/tzutalin/labelImg) to manually label all the images. After labelling all the images, LabelImg will create xml file for each image, and we need to convert those xml files to two tfrecord files, one is the training data, the other is the test data. The COCO pre-trained model uses 90 classes of images, but in this project we only care about red light, yellow light, and green light, so we create a label map that only contains 3 classes(Red, Yellow, and Green). Finally, modified some variables in the config file of ssd_mobilenet_v1_coco model and trained the model for 20000 steps.
+
+Here are some output images:
+
+![Red light](imgs/output_image3.jpg)
+
+![Yellow light](imgs/output_image2.jpg)
+
+![Green light](imgs/output_image1.jpg)
 
 
 
