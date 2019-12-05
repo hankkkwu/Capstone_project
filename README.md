@@ -29,6 +29,22 @@ Here are some output images:
 ![Green light](imgs/output_image1.jpg)
 
 
+## Planning Subsystem
+Once data from the sensors has been processed by the preception subsystem, the vehicle can use that information to plan its path. In this project we'll implement the waypoint updater node.
+
+### Waypoint Updater Node
+The eventual purpose of this node is to publish a fixed number of waypoints ahead of the vehicle with the correct target velocities, depending on traffic lights. This node subscribed to three topics:
+1. /base_waypoints : The complete list of waypoints for the course.
+2. /current_pose : The vehicle's location.
+3. /traffic_waypoint : The index of the waypoint for nearest upcoming red light's stop line.
+
+And this node will publish a list of waypoints to /final_waypoints topic, each waypoint contains a position on the map and a target velocity.
+
+The first waypoint in the list published to /final_waypoints topic should be the first waypoint that is currently ahead of our vehicle. To find the first waypoint, I've used the KD tree to find the closest waypoint to our vehicle’s current position and build a list containing the next 80 waypoints. Next, I subscribed to /traffic_waypoint topic, to see if there is any upcoming red traffic light. If there is any upcoming red light, I adjusted the target velocities for the waypoints leading up to red traffic light in order to bring the vehicle to a smooth and full stop at the red light's stop line.
+
+To perform a smooth deceleration, I calculated the distance between vehicle's current position and stop line's position, then use square root of that distance as waypoint's velocity. As we get closer to the stop line, the distance will be smaller, and the velocity will decrease as well. When the distance is smaller than 1, I just set the velocity to 0.
+
+
 
 ---
 This is the project repo for the final project of the Udacity Self-Driving Car Nanodegree: Programming a Real Self-Driving Car. For more information about the project, see the project introduction [here](https://classroom.udacity.com/nanodegrees/nd013/parts/6047fe34-d93c-4f50-8336-b70ef10cb4b2/modules/e1a23b06-329a-4684-a717-ad476f0d8dff/lessons/462c933d-9f24-42d3-8bdc-a08a5fc866e4/concepts/5ab4b122-83e6-436d-850f-9f4d26627fd9).
