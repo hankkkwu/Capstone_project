@@ -45,9 +45,35 @@ The first waypoint in the list published to /final_waypoints topic should be the
 To perform a smooth deceleration, I calculated the distance between vehicle's current position and stop line's position, then use square root of that distance as waypoint's velocity. As we get closer to the stop line, the distance will be smaller, and the velocity will decrease as well. When the distance is smaller than 1, I just set the velocity to 0.
 
 
+## Control Subsystem
+This subsystem contains software components to ensure that the vehicle follows the path specified by the planning subsystem. In this project we'll implement the DBW(Drive By wire) Node.
+
+### DBW Node
+Once messages are being published to /final_waypoints, the vehicle's waypoint follower will publish twist commands to the /twist_cmd topic. The goal for this node is to implement the drive-by-wire node which will subscribe to three topics:
+1. /vehicle/dbw_enabled : The DBW status. Since a safety driver may take control of the car during testing, we shouldn't assume that the car is always following our commands.
+2. /twist_cmd : Target vehicle linear and angular velocities in the form of twist commands.
+3. /current_velocity :  A linear velocity of vehicle in m/s.
+
+ And use various controllers to provide appropriate throttle, brake, and steering commands. These commands can then be published to the following topics:
+1. /vehicle/throttle_cmd : shoulg be in the range 0 to 1.
+2. /vehicle/brake_cmd : should be in units of torque(N*m).
+3. /vehicle/steering_cmd : should be in the range -8 to 8.
+
+At this point we have a linear and angular velocity and must adjust the vehicle’s controls accordingly. In this project we control 3 things: throttle, steering, brakes. As such, we have 3 distinct controllers to interface with the vehicle.
+
+#### Throttle Controller
+The throttle controller is a simple PID controller that uses the difference between current velocity (velocity that was been filtered out all of the high-frequency noise.) and target velocity (velocity that's coming in over the message) as the velocity error, and PID controller will adjust the throttle accordingly.
+
+#### Steering Controller
+This controller translates the linear and angular velocities into a steering angle based on the vehicle’s steering ratio and wheel base. The steering angle computed by the controller is also passed through a low pass filter to filter out all of the high-frequency noise in velocity data.
+
+#### Brake Controller
+First, if the target velocity is 0, and current is less than 0.1, that means the vehicle is really slow, and we should probably be trying to stop, so I just set the throttle value to 0 and the brake torque to 700(N*m) to stop the vehicle. Or if the throttle value is really small(less than 0.1), and the velocity error is less than 0, in this case, the velocity error is negative, which means that the vehicle is going faster than we want to be, so we will need to deceleration. I calculated the brake torque by multipling the following three variables : vehicle mass, wheel radius, and deceleration(the amount that we want to decelerate).
+
+
 
 ---
-This is the project repo for the final project of the Udacity Self-Driving Car Nanodegree: Programming a Real Self-Driving Car. For more information about the project, see the project introduction [here](https://classroom.udacity.com/nanodegrees/nd013/parts/6047fe34-d93c-4f50-8336-b70ef10cb4b2/modules/e1a23b06-329a-4684-a717-ad476f0d8dff/lessons/462c933d-9f24-42d3-8bdc-a08a5fc866e4/concepts/5ab4b122-83e6-436d-850f-9f4d26627fd9).
+## Installation
 
 Please use **one** of the two installation options, either native **or** docker installation.
 
@@ -88,7 +114,7 @@ To set up port forwarding, please refer to the "uWebSocketIO Starter Guide" foun
 
 1. Clone the project repository
 ```bash
-git clone https://github.com/udacity/CarND-Capstone.git
+git clone https://github.com/hankkkwu/SDCND-Capstone_project.git
 ```
 
 2. Install python dependencies
